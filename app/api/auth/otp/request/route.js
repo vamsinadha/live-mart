@@ -1,12 +1,13 @@
-// app/api/auth/otp/request/route.js
 import { connectDB } from "@/lib/db";
+import AuthService from "@/domain/services/AuthService";
 
 export async function POST(req) {
   await connectDB();
-  const body = await req.json();
-  const { phone } = body;
-  if (!phone) return new Response(JSON.stringify({ error: "phone required" }), { status: 400 });
-
-  // TODO: integrate Twilio Verify. For now return a stubbed response.
-  return new Response(JSON.stringify({ ok: true, message: "OTP sent (stub)" }), { status: 200 });
+  try {
+    const { phone } = await req.json();
+    const resp = await AuthService.requestOTP(phone);
+    return new Response(JSON.stringify(resp), { status: 200 });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 400 });
+  }
 }
